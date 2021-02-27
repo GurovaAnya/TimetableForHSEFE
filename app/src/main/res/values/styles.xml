@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="HSE.Style.Label" parent="HSE.Style.Value">
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/secondary_light</item>
+    </style>
+    <style name="HSE.Style.Value" parent="android:TextAppearance">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+    </style>
+    <style name="HSE.Style.Button" parent="@style/Widget.AppCompat.Button">
+        <item name="android:lines">2</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:layout_margin">5dp</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:layout_width">0dp</item>
+    </style>
+</resources>

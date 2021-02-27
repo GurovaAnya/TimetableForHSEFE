@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".StudentActivity">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:layout_margin="10dp">
+
+        <TextView
+            style="@style/HSE.Style.Label"
+            android:text="@string/selectStudent_text"/>
+
+        <Spinner
+            style="@style/HSE.Style.Label"
+            android:id="@+id/groupList"
+            android:padding="5dp"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <TextView
+                style="@style/HSE.Style.Value"
+                android:layout_width="wrap_content"
+                android:text="@string/now_text"/>
+
+            <TextView
+                style="@style/HSE.Style.Value"
+                android:id="@+id/time"/>
+
+        </LinearLayout>
+
+        <TextView
+            style="@style/HSE.Style.Value"
+            android:id="@+id/status"/>
+
+        <TextView
+            style="@style/HSE.Style.Value"
+            android:id="@+id/subject"/>
+
+        <TextView
+            style="@style/HSE.Style.Value"
+            android:id="@+id/cabinet"/>
+
+        <TextView
+            style="@style/HSE.Style.Value"
+            android:id="@+id/corp"/>
+
+        <TextView
+            style="@style/HSE.Style.Value"
+            android:id="@+id/teacher"/>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <Button
+                style="@style/HSE.Style.Button"
+                android:id="@+id/dayScheduleButton"
+                android:text="@string/dayScheduleButton_text"/>
+
+            <Button
+                style="@style/HSE.Style.Button"
+                android:id="@+id/weekScheduleButton"
+                android:text="@string/weekScheduleButton_text"/>
+
+        </LinearLayout>
+    </LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>
