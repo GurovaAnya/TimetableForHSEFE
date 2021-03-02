@@ -6,6 +6,7 @@ import androidx.core.content.FileProvider;
 
 import android.Manifest;
 import android.content.ActivityNotFoundException;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -102,7 +103,7 @@ public class SettingsActivity extends AppCompatActivity implements SensorEventLi
     }
 
     private void getPhoto(){
-        String path = preferenceManager.getAvatarPath();
+        String path = preferenceManager.getValue(PreferenceValues.AVATAR_PREFERENCE_KEY.getValue(), "");
         if( path != null) {
             imageFilePath = path;
             loadPhoto();
@@ -110,18 +111,17 @@ public class SettingsActivity extends AppCompatActivity implements SensorEventLi
     }
 
     private void getName(){
-        String name = preferenceManager.getName();
+        String name = preferenceManager.getValue(PreferenceValues.NAME_KEY.getValue(), "");
         if (name != null)
             nameEdit.setText(name);
     }
 
     private void save(){
         if(nameEdit.getText()!=null)
-            preferenceManager.saveName(nameEdit.getText().toString());
+            preferenceManager.saveValue(PreferenceValues.NAME_KEY.getValue(), nameEdit.getText().toString());
         if (imageFilePath!=null)
-            preferenceManager.saveAvatarPath(imageFilePath);
-        Toast toast = Toast.makeText(getApplicationContext(), "Сохранено", Toast.LENGTH_SHORT);
-        toast.show();
+            preferenceManager.saveValue(PreferenceValues.AVATAR_PREFERENCE_KEY.getValue(), imageFilePath);
+        Toast.makeText(getApplicationContext(), "Сохранено", Toast.LENGTH_SHORT).show();
     }
 
     private void loadPhoto(){
@@ -132,6 +132,7 @@ public class SettingsActivity extends AppCompatActivity implements SensorEventLi
 
     private void dispatchTakePictureIntent(){
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        ComponentName var = takePictureIntent.resolveActivity(getPackageManager());
         if(takePictureIntent.resolveActivity(getPackageManager())!=null){
             File photoFile = null;
             try{
@@ -156,8 +157,7 @@ public class SettingsActivity extends AppCompatActivity implements SensorEventLi
         int permissionCheck = ActivityCompat.checkSelfPermission(this, PERMISSION);
         if (permissionCheck != PackageManager.PERMISSION_GRANTED){
             if(ActivityCompat.shouldShowRequestPermissionRationale(this, PERMISSION)){
-                /*showExplanation("Нужно предоставить права",
-                        "Для снятия фото нужно предоставить права на фото", PERMISSION, REQUEST_PERMISSION_CODE);*/
+                Toast.makeText(getApplicationContext(), "Для снятия фото нужно предоставить права на фото", Toast.LENGTH_LONG).show();
             }else{
                 ActivityCompat.requestPermissions(this, new String[]{PERMISSION}, REQUEST_PERMISSION_CODE);
             }
@@ -181,7 +181,7 @@ public class SettingsActivity extends AppCompatActivity implements SensorEventLi
     @Override
     public void onSensorChanged(SensorEvent event) {
         float lux = event.values[0];
-        sensorLight.setText(lux + "lux");
+        sensorLight.setText(lux + " lux");
     }
 
     @Override
