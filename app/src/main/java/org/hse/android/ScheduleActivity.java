@@ -39,13 +39,12 @@ public class ScheduleActivity extends AppCompatActivity {
     private Integer id;
     private String name;
     private String TAG = "ScheduleActivity";
-    public final static String URL = "http://api.ipgeolocation.io/ipgeo?apiKey=b03018f75ed94023a005637878ec0977";
-    protected OkHttpClient client = new OkHttpClient();
 
     public static String ARG_TYPE = "ARG_TYPE";
     public static String ARG_MODE = "ARG_MODE";
     public static String ARG_ID = "ARG_ID";
     public static String ARG_NAME = "ARG_NAME";
+    public static String ARG_TIME = "ARG_TIME";
     public Integer DEFAULT_ID = -1;
 
     RecyclerView recyclerView;
@@ -63,6 +62,7 @@ public class ScheduleActivity extends AppCompatActivity {
         mode = (BaseActivity.ScheduleMode) getIntent().getSerializableExtra(ARG_MODE);
         id = getIntent().getIntExtra(ARG_ID, DEFAULT_ID);
         name = getIntent().getStringExtra(ARG_NAME);
+        currentTime = (Date)getIntent().getSerializableExtra(ARG_TIME);
 
 
         recyclerView = findViewById(R.id.listView);
@@ -77,51 +77,8 @@ public class ScheduleActivity extends AppCompatActivity {
     }
 
 
-    protected void getTime(){
-        Request request = new Request.Builder().url(URL).build();
-        Call call = client.newCall(request);
-        call.enqueue(new Callback() {
-            @Override
-            public void onFailure(@NotNull Call call, @NotNull IOException e) {
-                Log.e(TAG, "getTime", e);
-            }
-
-            @Override
-            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
-                parseResponse(response);
-            }
-        });
-    }
-
-    protected void initTime(){
-        getTime();
-    }
-
-
-    private void parseResponse(Response response){
-        Gson gson = new Gson();
-        ResponseBody responseBody = response.body();
-        try{
-            if(responseBody==null)
-                return;
-            String string = responseBody.string();
-            Log.d(TAG, string);
-            TimeResponse timeResponse = gson.fromJson(string, TimeResponse.class);
-            String currentTimeVal = timeResponse.getTimeZone().getCurrentTime();
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSSX", Locale.getDefault());
-            Date dateTime = simpleDateFormat.parse(currentTimeVal);
-            runOnUiThread(() -> showTime(dateTime));
-        }
-        catch (Exception e){
-            Log.e(TAG, "", e);
-        }
-    }
-
-    private void showTime(Date dateTime) {
+    private void initTime() {
         TextView time = findViewById(R.id.time);
-        if(dateTime == null)
-            return;
-        currentTime = dateTime;
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("EEEE, dd MMMM", new Locale("ru"));
         time.setText(simpleDateFormat.format(currentTime));
     }

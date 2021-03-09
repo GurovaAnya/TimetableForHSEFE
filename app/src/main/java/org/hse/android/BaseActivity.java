@@ -85,6 +85,7 @@ public class BaseActivity extends AppCompatActivity {
         intent.putExtra(ScheduleActivity.ARG_NAME, group.getName());
         intent.putExtra(ScheduleActivity.ARG_MODE, mode);
         intent.putExtra(ScheduleActivity.ARG_TYPE, type);
+        intent.putExtra(ScheduleActivity.ARG_TIME, currentTime);
         startActivity(intent);
     }
 
