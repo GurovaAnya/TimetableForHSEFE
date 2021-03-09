@@ -11,4 +11,5 @@
     <color name="primaryVariant_light">#011F5A</color>
     <color name="secondary_light">#4080ff</color>
     <color name="secondaryVariant_light">#0C5DFD</color>
+    <color name="color_4080ff">#4080FF</color>
 </resources>

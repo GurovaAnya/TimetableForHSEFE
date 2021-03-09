@@ -15,4 +15,9 @@
         <item name="android:layout_height">match_parent</item>
         <item name="android:layout_width">0dp</item>
     </style>
+    <style name="HSE.Style.BigLabel" parent="HSE.Style.Value">
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/secondary_light</item>
+        <item name="android:textSize">20dp</item>
+    </style>
 </resources>

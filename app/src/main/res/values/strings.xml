@@ -8,7 +8,7 @@
     <string name="selectStudent_text">Выберите группу:</string>
     <string name="dayScheduleButton_text">Расписание на день</string>
     <string name="weekScheduleButton_text">Расписание на неделю</string>
-    <string name="now_text">Сейчас:</string>
+    <string name="now_text">Сейчас: \u0020</string>
     <string name="main_button_settings">Настройки</string>
     <string name="selectPhoto_text">Укажите фото</string>
     <string name="uploadPhoto_text">Сделать фото</string>
