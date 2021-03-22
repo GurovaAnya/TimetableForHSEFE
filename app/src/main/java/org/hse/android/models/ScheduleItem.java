@@ -1,4 +1,4 @@
-package org.hse.android;
+package org.hse.android.models;
 
 public class ScheduleItem{
     private String start;

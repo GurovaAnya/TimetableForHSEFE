@@ -1,42 +1,40 @@
-package org.hse.android;
+package org.hse.android.activities;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.google.gson.Gson;
+import org.hse.android.R;
+import org.hse.android.models.ScheduleItem;
+import org.hse.android.models.ScheduleItemHeader;
+import org.hse.android.entities.TimeTableWithTeacherEntity;
+import org.hse.android.viewmodels.MainViewModel;
 
-import org.jetbrains.annotations.NotNull;
-
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-
-import okhttp3.Call;
-import okhttp3.Callback;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
-import okhttp3.ResponseBody;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class ScheduleActivity extends AppCompatActivity {
 
     private BaseActivity.ScheduleType type;
     private BaseActivity.ScheduleMode mode;
-    private Integer id;
+    private Integer argId;
     private String name;
     private String TAG = "ScheduleActivity";
 
@@ -52,15 +50,19 @@ public class ScheduleActivity extends AppCompatActivity {
     TextView title;
     Date currentTime;
 
+    protected MainViewModel mainViewModel;
+    List<ScheduleItem> scheduleList = new ArrayList<>();
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_schedule);
+        mainViewModel = ViewModelProviders.of(this).get(MainViewModel.class);
 
         type = (BaseActivity.ScheduleType) getIntent().getSerializableExtra(ARG_TYPE);
         mode = (BaseActivity.ScheduleMode) getIntent().getSerializableExtra(ARG_MODE);
-        id = getIntent().getIntExtra(ARG_ID, DEFAULT_ID);
+        argId = getIntent().getIntExtra(ARG_ID, DEFAULT_ID);
         name = getIntent().getStringExtra(ARG_NAME);
         currentTime = (Date)getIntent().getSerializableExtra(ARG_TIME);
 
@@ -79,8 +81,12 @@ public class ScheduleActivity extends AppCompatActivity {
 
     private void initTime() {
         TextView time = findViewById(R.id.time);
+        time.setText(formatDateDay(currentTime));
+    }
+
+    private String formatDateDay(Date date){
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("EEEE, dd MMMM", new Locale("ru"));
-        time.setText(simpleDateFormat.format(currentTime));
+        return simpleDateFormat.format(date);
     }
 
     private void initTitle() {
@@ -95,33 +101,84 @@ public class ScheduleActivity extends AppCompatActivity {
 
 
     private void initData(){
-        List<ScheduleItem> list = new ArrayList<>();
 
-        ScheduleItemHeader header = new ScheduleItemHeader();
-        header.setTitle("Понедельник, 28 января");
-        list.add(header);
-
-        ScheduleItem item = new ScheduleItem();
-        item.setStart("10:00");
-        item.setEnd("11:00");
-        item.setType("Практическое занятие");
-        item.setName("Анализ данных");
-        item.setPlace("Ауд. 503, Кочновский пр-д, д.3");
-        item.setTeacher("Пред. Гущим Михаил Иванович");
-        list.add(item);
-
-        item = new ScheduleItem();
-        item.setStart("11:00");
-        item.setEnd("12:00");
-        item.setType("Практическое занятие");
-        item.setName("Анализ данных");
-        item.setPlace("Ауд. 503, Кочновский пр-д, д.3");
-        item.setTeacher("Пред. Гущим Михаил Иванович");
-        list.add(item);
-
-        adapter.setDataList(list);
+        Observer observer = new Observer<List<TimeTableWithTeacherEntity>>() {
+            @Override
+            public void onChanged(List<TimeTableWithTeacherEntity> timeTableWithTeacherEntities) {
+                scheduleList = getScheduleItems(timeTableWithTeacherEntities);
+                adapter.setDataList(scheduleList);
+                recyclerView.setAdapter(adapter);
+            }
+        };
+        applyFunctionForTimeTable(observer);
     }
 
+    private List<ScheduleItem> getScheduleItems(List<TimeTableWithTeacherEntity> timeTableWithTeacherEntities) {
+        List<ScheduleItem> list = new ArrayList<>();
+
+        Map<String, List<TimeTableWithTeacherEntity>> days =
+                timeTableWithTeacherEntities
+                .stream()
+                .sorted(Comparator.comparing(t -> t.timeTableEntity.timeStart))
+                .collect(Collectors.groupingBy(t -> formatDateDay(t.timeTableEntity.timeStart)));
+
+        for (Map.Entry<String, List<TimeTableWithTeacherEntity>> day: days.entrySet()
+             ) {
+            ScheduleItemHeader header = new ScheduleItemHeader();
+            header.setTitle(day.getKey());
+            list.add(header);
+
+            for(TimeTableWithTeacherEntity timetable: day.getValue()){
+                list.add(convertItem(timetable));
+            }
+        }
+        return list;
+    }
+
+    private void applyFunctionForTimeTable(Observer observer) {
+        switch (type){
+            case DAY:
+                switch (mode){
+                    case STUDENT:
+                        mainViewModel.getTimeTableForStudentDay(currentTime, argId).observe(this,observer);
+                        break;
+                    case TEACHER:
+                        mainViewModel.getTimeTableForTeacherDay(currentTime, argId).observe(this,observer);
+                        break;
+                }
+                break;
+            case WEEK:
+                switch (mode){
+                    case STUDENT:
+                        mainViewModel.getTimeTableForStudentWeek(currentTime, argId).observe(this,observer);
+                        break;
+                    case TEACHER:
+                        mainViewModel.getTimeTableForTeacherWeek(currentTime, argId).observe(this,observer);
+                        break;
+                }
+                break;
+        }
+    }
+
+    private void processStudentDay() {
+
+    }
+
+    private ScheduleItem convertItem(TimeTableWithTeacherEntity timeTableWithTeacherEntity){
+        ScheduleItem item = new ScheduleItem();
+        item.setStart(formatToMinutes(timeTableWithTeacherEntity.timeTableEntity.timeStart));
+        item.setEnd(formatToMinutes(timeTableWithTeacherEntity.timeTableEntity.timeEnd));
+        item.setType(String.valueOf(timeTableWithTeacherEntity.timeTableEntity.type));
+        item.setName(timeTableWithTeacherEntity.timeTableEntity.subjName);
+        item.setPlace(timeTableWithTeacherEntity.timeTableEntity.corp);
+        item.setTeacher(timeTableWithTeacherEntity.teacherEntity.fio);
+        return item;
+    }
+
+    private String formatToMinutes(Date date){
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm", Locale.getDefault());
+        return simpleDateFormat.format(date);
+    }
 
     public static final class ItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
         private final static int TYPE_ITEM = 0;

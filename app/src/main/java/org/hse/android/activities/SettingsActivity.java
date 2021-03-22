@@ -1,4 +1,4 @@
-package org.hse.android;
+package org.hse.android.activities;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
@@ -27,6 +27,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+
+import org.hse.android.BuildConfig;
+import org.hse.android.PreferenceManager;
+import org.hse.android.PreferenceValues;
+import org.hse.android.R;
 
 import java.io.File;
 import java.io.IOException;
@@ -121,7 +126,7 @@ public class SettingsActivity extends AppCompatActivity implements SensorEventLi
             preferenceManager.saveValue(PreferenceValues.NAME_KEY.getValue(), nameEdit.getText().toString());
         if (imageFilePath!=null)
             preferenceManager.saveValue(PreferenceValues.AVATAR_PREFERENCE_KEY.getValue(), imageFilePath);
-        Toast.makeText(getApplicationContext(), "Сохранено", Toast.LENGTH_SHORT).show();
+        Toast.makeText(getApplicationContext(), getString(R.string.saved_message), Toast.LENGTH_SHORT).show();
     }
 
     private void loadPhoto(){
@@ -157,7 +162,7 @@ public class SettingsActivity extends AppCompatActivity implements SensorEventLi
         int permissionCheck = ActivityCompat.checkSelfPermission(this, PERMISSION);
         if (permissionCheck != PackageManager.PERMISSION_GRANTED){
             if(ActivityCompat.shouldShowRequestPermissionRationale(this, PERMISSION)){
-                Toast.makeText(getApplicationContext(), "Для снятия фото нужно предоставить права на фото", Toast.LENGTH_LONG).show();
+                Toast.makeText(getApplicationContext(), getString(R.string.ask_photo_permits), Toast.LENGTH_LONG).show();
             }else{
                 ActivityCompat.requestPermissions(this, new String[]{PERMISSION}, REQUEST_PERMISSION_CODE);
             }

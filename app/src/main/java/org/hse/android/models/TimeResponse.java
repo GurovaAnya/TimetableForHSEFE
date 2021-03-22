@@ -1,12 +1,14 @@
-package org.hse.android;
+package org.hse.android.models;
 
 import com.google.gson.annotations.SerializedName;
 
+import org.hse.android.models.TimeZone;
+
 public class TimeResponse{
     @SerializedName("time_zone")
-    private org.hse.android.TimeZone timeZone;
+    private TimeZone timeZone;
 
-    public org.hse.android.TimeZone getTimeZone(){
+    public TimeZone getTimeZone(){
         return timeZone;
     }
 

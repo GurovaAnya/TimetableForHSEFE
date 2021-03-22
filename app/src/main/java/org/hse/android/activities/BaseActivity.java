@@ -1,14 +1,19 @@
-package org.hse.android;
+package org.hse.android.activities;
 
 import android.content.Intent;
-import android.os.Build;
+import android.os.Bundle;
 import android.util.Log;
 import android.widget.TextView;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProviders;
 
 import com.google.gson.Gson;
 
+import org.hse.android.models.TimeResponse;
+import org.hse.android.viewmodels.MainViewModel;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -32,6 +37,14 @@ public class BaseActivity extends AppCompatActivity {
 
     protected OkHttpClient client = new OkHttpClient();
 
+    protected MainViewModel mainViewModel;
+
+    @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        mainViewModel = ViewModelProviders.of(this).get(MainViewModel.class);
+    }
+
     protected void getTime(){
         Request request = new Request.Builder().url(URL).build();
         Call call = client.newCall(request);
@@ -42,7 +55,7 @@ public class BaseActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+            public void onResponse(@NotNull Call call, @NotNull Response response) {
                 parseResponse(response);
             }
         });
@@ -52,12 +65,18 @@ public class BaseActivity extends AppCompatActivity {
         getTime();
     }
 
-    private void showTime(Date dateTime){
-        if(dateTime == null)
-            return;
-        currentTime = dateTime;
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm EEEE", new Locale("ru"));
-        time.setText(simpleDateFormat.format(currentTime));
+    protected void showTime(){
+
+        mainViewModel.currentTime.observe(this, new Observer<Date>() {
+            @Override
+            public void onChanged(Date date) {
+                if(date == null)
+                    return;
+                currentTime = date;
+                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm EEEE", new Locale("ru"));
+                time.setText(simpleDateFormat.format(currentTime));
+            }
+        });
     }
 
     private void parseResponse(Response response){
@@ -72,7 +91,10 @@ public class BaseActivity extends AppCompatActivity {
             String currentTimeVal = timeResponse.getTimeZone().getCurrentTime();
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSSX", Locale.getDefault());
             Date dateTime = simpleDateFormat.parse(currentTimeVal);
-            runOnUiThread(() -> showTime(dateTime));
+            runOnUiThread(() -> {
+                showTime();
+                mainViewModel.currentTime.setValue(dateTime);
+            });
         }
         catch (Exception e){
             Log.e(TAG, "", e);

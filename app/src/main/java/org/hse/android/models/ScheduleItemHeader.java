@@ -1,6 +1,8 @@
-package org.hse.android;
+package org.hse.android.models;
 
-public class ScheduleItemHeader extends ScheduleItem{
+import org.hse.android.models.ScheduleItem;
+
+public class ScheduleItemHeader extends ScheduleItem {
     private String header;
 
     public String getTitle() {

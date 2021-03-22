@@ -1,4 +1,4 @@
-package org.hse.android;
+package org.hse.android.activities;
 
 import android.os.Bundle;
 import android.util.Log;
@@ -8,11 +8,16 @@ import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 import android.widget.TextView;
 
-import java.text.SimpleDateFormat;
+import androidx.annotation.Nullable;
+import androidx.lifecycle.Observer;
+
+import org.hse.android.R;
+import org.hse.android.entities.GroupEntity;
+import org.hse.android.entities.TimeTableEntity;
+import org.hse.android.entities.TimeTableWithTeacherEntity;
+
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 
 public class StudentActivity extends BaseActivity {
 
@@ -24,6 +29,8 @@ public class StudentActivity extends BaseActivity {
     String TAG = "StudentActivity";
     Spinner spinner;
 
+    ArrayAdapter<Group> adapter;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -33,7 +40,7 @@ public class StudentActivity extends BaseActivity {
         List<Group> groups = new ArrayList<>();
         initGroupList(groups);
 
-        ArrayAdapter<?> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, groups);
+        adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, groups);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_item);
 
         spinner.setAdapter(adapter);
@@ -42,8 +49,7 @@ public class StudentActivity extends BaseActivity {
             @Override
             public void onItemSelected(AdapterView<?> parent, View itemSelected,
                                        int selectedItemPosition, long id) {
-                Object item = adapter.getItem(selectedItemPosition);
-                Log.d(TAG, "selectedItem: " + item);
+                onSpinnerItemSelected(selectedItemPosition);
             }
 
             @Override
@@ -66,12 +72,24 @@ public class StudentActivity extends BaseActivity {
         weekScheduleButton.setOnClickListener(v -> showSchedule(ScheduleType.WEEK));
     }
 
-    private void initGroupList(List<Group> groups){
-        addGroup(groups, "ПИ", 17, 2);
-        addGroup(groups, "ПИ", 18, 2);
-        addGroup(groups, "ПИ", 19, 3);
-        addGroup(groups, "ПИ", 20, 3);
+    private void onSpinnerItemSelected(int selectedItemPosition) {
+        Object item = adapter.getItem(selectedItemPosition);
+        Log.d(TAG, "selectedItem: " + item);
+        initTime();
+    }
 
+    private void initGroupList(final List<Group> groups){
+        mainViewModel.getGroups().observe(this, new Observer<List<GroupEntity>>() {
+            @Override
+            public void onChanged(@Nullable List<GroupEntity> groupEntities) {
+                List<Group> groupsResult = new ArrayList<>();
+                for (GroupEntity listEntity : groupEntities){
+                    groupsResult.add(new Group(listEntity.id, listEntity.name));
+                }
+                adapter.clear();
+                adapter.addAll(groupsResult);
+            }
+        });
     }
 
     private void addGroup(List<Group> groups, String educationalProgram, int year, int groupCount){
@@ -81,11 +99,37 @@ public class StudentActivity extends BaseActivity {
 
 
     private void initData(){
-        status.setText("Нет пар");
-        subject.setText("Дисциплина");
-        cabinet.setText("Кабинет");
-        corp.setText("Корпус");
-        teacher.setText("Преподаватель");
+        initDataFromTimeTable(null);
+    }
+
+    @Override
+    protected void showTime() {
+        super.showTime();
+        if (getSelectedGroup() != null) {
+            mainViewModel.getTimeWithGroupByDate(currentTime, getSelectedGroup().getId()).observe(this, new Observer<TimeTableWithTeacherEntity>() {
+                @Override
+                public void onChanged(@Nullable TimeTableWithTeacherEntity listEntity) {
+                    initDataFromTimeTable(listEntity);
+                }
+            });
+        }
+    }
+
+    private void initDataFromTimeTable(TimeTableWithTeacherEntity timeTableWithTeacherEntity){
+        if (timeTableWithTeacherEntity == null){
+            status.setText(getString(R.string.status_no_pairs));
+            subject.setText(getString(R.string.subject_null));
+            cabinet.setText(getString(R.string.cabinet_null));
+            corp.setText(getString(R.string.corp_null));
+            teacher.setText(getString(R.string.teacher_null));
+            return;
+        }
+        status.setText(getString(R.string.status_in_progress));
+        TimeTableEntity timeTableEntity = timeTableWithTeacherEntity.timeTableEntity;
+        subject.setText(timeTableEntity.subjName);
+        cabinet.setText(timeTableEntity.cabinet);
+        corp.setText(timeTableEntity.corp);
+        teacher.setText(timeTableWithTeacherEntity.teacherEntity.fio);
     }
 
     private void showSchedule(ScheduleType type){
@@ -94,6 +138,11 @@ public class StudentActivity extends BaseActivity {
             return;
         }
         showScheduleImpl(ScheduleMode.STUDENT, type, (Group) selectedItem);
+    }
+
+
+    protected Group getSelectedGroup(){
+        return (Group) spinner.getSelectedItem();
     }
 
     ////////////////////////

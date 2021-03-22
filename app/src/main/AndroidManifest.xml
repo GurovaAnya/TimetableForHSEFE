@@ -16,11 +16,11 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.TimetableForHSEFE"
         tools:targetApi="m">
-        <activity android:name=".ScheduleActivity" />
-        <activity android:name=".TeacherActivity" />
-        <activity android:name=".StudentActivity" />
-        <activity android:name=".SettingsActivity" />
-        <activity android:name=".MainActivity">
+        <activity android:name=".activities.ScheduleActivity" />
+        <activity android:name=".activities.TeacherActivity" />
+        <activity android:name=".activities.StudentActivity" />
+        <activity android:name=".activities.SettingsActivity" />
+        <activity android:name=".activities.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

@@ -16,4 +16,13 @@
     <string name="save_text">Сохранить</string>
     <string name="settings_hint_name">Введите ваше имя</string>
     <string name="settings_all_sensors">Все датчики:</string>
+    <string name="saved_message">Сохранено</string>
+    <string name="ask_photo_permits">Для снятия фото нужно предоставить права на фото</string>
+    <string name="status_no_pairs">Нет пар</string>
+    <string name="subject_null">Дисциплина</string>
+    <string name="cabinet_null">Кабинет</string>
+    <string name="corp_null">Корпус</string>
+    <string name="teacher_null">Преподаватель</string>
+    <string name="status_in_progress">Идет пара</string>
+
 </resources>
